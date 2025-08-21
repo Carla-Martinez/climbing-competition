@@ -116,4 +116,3 @@ for nombre, intentos in st.session_state.resultados.items():
         else:
             historial.append("DNF")
     st.write(f"**{nombre}**: {', '.join(historial) if historial else 'Sin intentos'}")
-s
