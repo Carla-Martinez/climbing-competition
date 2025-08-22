@@ -24,6 +24,10 @@ def puntuar(pb, tiempo, nuevo_pb):
 
 st.title("🏆 Competición de Escalada - Ranking en Vivo")
 
+# Inicializa el estado para controlar la visibilidad
+if 'show_podium' not in st.session_state:
+    st.session_state.show_podium = False
+
 # Auto-refresco cada 5 segundos
 _ = st_autorefresh(interval=5000, key="refresh")
 
@@ -42,81 +46,7 @@ if os.path.exists(CSV_FILE) and os.path.getsize(CSV_FILE) > 0:
         st.info("El historial podría estar corrupto. Se reiniciará la aplicación.")
         os.remove(CSV_FILE)
 
-# Formulario de entrada
-col1, col2, col3 = st.columns([2, 2, 2])
-with col1:
-    nombre = st.selectbox("Escoge competidor", list(competidores.keys()))
-with col2:
-    opcion = st.radio("Resultado", ["Tiempo", "DNF"], horizontal=True)
-with col3:
-    tiempo = st.number_input("Nuevo tiempo (s)", min_value=0.0, step=0.01) if opcion == "Tiempo" else None
-
-col4, col5, col6, col7, col8 = st.columns(5)
-
-with col4:
-    if st.button("➕ Añadir intento"):
-        resultados[nombre].append(("tiempo", tiempo) if opcion == "Tiempo" and tiempo > 0 else ("dnf", None))
-        st.success(f"{nombre}: {'tiempo ' + f'{tiempo:.2f}s' if opcion == 'Tiempo' else 'DNF'} añadido")
-        rows = [{"Competidor": n, "Tipo": t, "Valor": v} for n, intentos in resultados.items() for t, v in intentos]
-        # Al guardar el CSV, usa ';' como separador
-        pd.DataFrame(rows).to_csv(CSV_FILE, index=False, sep=';')
-
-with col5:
-    if st.button("↩️ Deshacer último intento"):
-        if resultados[nombre]:
-            ultimo = resultados[nombre].pop()
-            st.info(f"Último intento de {nombre} eliminado ({'DNF' if ultimo[0]=='dnf' else f'{ultimo[1]:.2f}s'})")
-            rows = [{"Competidor": n, "Tipo": t, "Valor": v} for n, intentos in resultados.items() for t, v in intentos]
-            # Al guardar el CSV, usa ';' como separador
-            pd.DataFrame(rows).to_csv(CSV_FILE, index=False, sep=';')
-        else:
-            st.error(f"{nombre} no tiene intentos para borrar")
-
-with col6:
-    if st.button("🗑️ Borrar historial"):
-        if os.path.exists(CSV_FILE):
-            os.remove(CSV_FILE)
-        resultados = {nombre: [] for nombre in competidores.keys()}
-        st.info("Historial borrado. Competición reiniciada.")
-
-# --- Lógica para el nuevo botón de descarga ---
-data_to_download = []
-for competidor, intentos in resultados.items():
-    pb_inicial = competidores[competidor]
-    for i, (tipo, valor) in enumerate(intentos):
-        puntos_intento = 0
-        if tipo == "tiempo":
-            puntos_intento = puntuar(pb_inicial, valor, valor < pb_inicial)
-        
-        data_to_download.append({
-            "Competidor": competidor,
-            "PB Inicial": pb_inicial,
-            "Intento": i + 1,
-            "Tipo de Intento": tipo,
-            "Tiempo (s)": f"{valor:.2f}" if valor else "N/A",
-            "Puntos por Intento": puntos_intento
-        })
-
-df_download = pd.DataFrame(data_to_download)
-
-# Al crear el archivo para descargar, usa ';' como separador
-csv_string = df_download.to_csv(index=False, sep=';')
-csv_buffer = io.StringIO(csv_string)
-
-with col7:
-    st.download_button(
-        label="⬇️ Descargar historial",
-        data=csv_buffer.getvalue().encode('utf-8'),
-        file_name='historial_escalada.csv',
-        mime='text/csv',
-    )
-    
-# Botón para ver el podio
-with col8:
-    if st.button("🏅 Ver podio"):
-        st.session_state.show_podium = True
-
-# Cálculo de ranking
+# Cálculo de ranking para el podio y la clasificación
 resultados_finales = []
 for nombre, pb in competidores.items():
     intentos = resultados[nombre]
@@ -125,7 +55,8 @@ for nombre, pb in competidores.items():
     dnfs = 0
     for tipo, valor in intentos:
         if tipo == "tiempo":
-            nuevo_pb = valor < mejor
+            # Condición corregida para incluir el mismo tiempo como PB
+            nuevo_pb = valor <= mejor
             if len(intentos) <= 7:
                 puntos += puntuar(pb, valor, nuevo_pb)
                 mejor = valor if nuevo_pb else mejor
@@ -139,54 +70,127 @@ for nombre, pb in competidores.items():
         "PB inicial": pb,
         "Intentos": len(intentos),
         "DNFs": dnfs,
-        "Puntos": puntos
+        "Puntos": puntos,
+        "Mejor tiempo": mejor
     })
 
 # Aquí la tabla se ordena por puntos
 df = pd.DataFrame(resultados_finales).sort_values(by="Puntos", ascending=False)
 
-# Función para colorear solo la primera, segunda y tercera fila de la tabla
-def highlight_top_three_by_rank(row):
-    rank = df.index.get_loc(row.name)  # Obtiene la posición de la fila en el DataFrame ordenado
-    styles = [''] * len(row)
+# Si el podio NO está visible, muestra el resto de la interfaz
+if not st.session_state.show_podium:
+    # Formulario de entrada
+    col1, col2, col3 = st.columns([2, 2, 2])
+    with col1:
+        nombre = st.selectbox("Escoge competidor", list(competidores.keys()))
+    with col2:
+        opcion = st.radio("Resultado", ["Tiempo", "DNF"], horizontal=True)
+    with col3:
+        tiempo = st.number_input("Nuevo tiempo (s)", min_value=0.0, step=0.01) if opcion == "Tiempo" else None
 
-    if rank == 0:
-        styles = ['background-color: rgba(255, 215, 0, 0.4)'] * len(row) # Oro
-    elif rank == 1:
-        styles = ['background-color: rgba(192, 192, 192, 0.4)'] * len(row) # Plata
-    elif rank == 2:
-        styles = ['background-color: rgba(205, 127, 50, 0.4)'] * len(row) # Bronce
-    
-    return styles
+    col4, col5, col6, col7, col8 = st.columns(5)
 
-st.subheader("📊 Clasificación en Vivo")
-# Usa st.dataframe y el estilo para aplicar los colores
-st.dataframe(df.style.apply(highlight_top_three_by_rank, axis=1), use_container_width=True)
+    with col4:
+        if st.button("➕ Añadir intento"):
+            resultados[nombre].append(("tiempo", tiempo) if opcion == "Tiempo" and tiempo > 0 else ("dnf", None))
+            st.success(f"{nombre}: {'tiempo ' + f'{tiempo:.2f}s' if opcion == 'Tiempo' else 'DNF'} añadido")
+            rows = [{"Competidor": n, "Tipo": t, "Valor": v} for n, intentos in resultados.items() for t, v in intentos]
+            # Al guardar el CSV, usa ';' como separador
+            pd.DataFrame(rows).to_csv(CSV_FILE, index=False, sep=';')
 
-st.subheader("📜 Historial de intentos")
-for nombre, intentos in resultados.items():
-    historial = [f"{valor:.2f}s" if t == "tiempo" else "DNF" for t, valor in intentos]
-    st.write(f"**{nombre}**: {', '.join(historial) if historial else 'Sin intentos'}")
+    with col5:
+        if st.button("↩️ Deshacer último intento"):
+            if resultados[nombre]:
+                ultimo = resultados[nombre].pop()
+                st.info(f"Último intento de {nombre} eliminado ({'DNF' if ultimo[0]=='dnf' else f'{ultimo[1]:.2f}s'})")
+                rows = [{"Competidor": n, "Tipo": t, "Valor": v} for n, intentos in resultados.items() for t, v in intentos]
+                # Al guardar el CSV, usa ';' como separador
+                pd.DataFrame(rows).to_csv(CSV_FILE, index=False, sep=';')
+            else:
+                st.error(f"{nombre} no tiene intentos para borrar")
 
-# Mostrar el podio solo si el botón se ha pulsado
-if 'show_podium' in st.session_state and st.session_state.show_podium:
+    with col6:
+        if st.button("🗑️ Borrar historial"):
+            if os.path.exists(CSV_FILE):
+                os.remove(CSV_FILE)
+            resultados = {nombre: [] for nombre in competidores.keys()}
+            st.info("Historial borrado. Competición reiniciada.")
+
+    # --- Lógica para el nuevo botón de descarga ---
+    data_to_download = []
+    for competidor, intentos in resultados.items():
+        pb_inicial = competidores[competidor]
+        for i, (tipo, valor) in enumerate(intentos):
+            puntos_intento = 0
+            if tipo == "tiempo":
+                puntos_intento = puntuar(pb_inicial, valor, valor < pb_inicial)
+            
+            data_to_download.append({
+                "Competidor": competidor,
+                "PB Inicial": pb_inicial,
+                "Intento": i + 1,
+                "Tipo de Intento": tipo,
+                "Tiempo (s)": f"{valor:.2f}" if valor else "N/A",
+                "Puntos por Intento": puntos_intento
+            })
+
+    df_download = pd.DataFrame(data_to_download)
+
+    # Al crear el archivo para descargar, usa ';' como separador
+    csv_string = df_download.to_csv(index=False, sep=';')
+    csv_buffer = io.StringIO(csv_string)
+
+    with col7:
+        st.download_button(
+            label="⬇️ Descargar historial",
+            data=csv_buffer.getvalue().encode('utf-8'),
+            file_name='historial_escalada.csv',
+            mime='text/csv',
+        )
+
+    # Botón para ver el podio
+    with col8:
+        if st.button("🏅 Ver podio"):
+            st.session_state.show_podium = True
+            
+    # Función para colorear solo la primera, segunda y tercera fila de la tabla
+    def highlight_top_three_by_rank(row):
+        rank = df.index.get_loc(row.name)  # Obtiene la posición de la fila en el DataFrame ordenado
+        styles = [''] * len(row)
+
+        if rank == 0:
+            styles = ['background-color: rgba(255, 215, 0, 0.4)'] * len(row) # Oro
+        elif rank == 1:
+            styles = ['background-color: rgba(192, 192, 192, 0.4)'] * len(row) # Plata
+        elif rank == 2:
+            styles = ['background-color: rgba(205, 127, 50, 0.4)'] * len(row) # Bronce
+        
+        return styles
+
+    st.subheader("📊 Clasificación en Vivo")
+    # Usa st.dataframe y el estilo para aplicar los colores
+    st.dataframe(df.style.apply(highlight_top_three_by_rank, axis=1), use_container_width=True)
+
+    st.subheader("📜 Historial de intentos")
+    for nombre, intentos in resultados.items():
+        historial = [f"{valor:.2f}s" if t == "tiempo" else "DNF" for t, valor in intentos]
+        st.write(f"**{nombre}**: {', '.join(historial) if historial else 'Sin intentos'}")
+        
+# Si el podio está visible, lo muestra
+else:
     st.subheader("🏆 Podio")
+    # Botón para volver al ranking
+    st.button("↩️ Volver al ranking", on_click=lambda: st.session_state.update(show_podium=False))
+    
     # Limita la tabla a los 3 primeros
     top_3 = df.head(3)
     
-    # Obtener el mejor tiempo de cada uno de los top 3
+    # Prepara los datos para la tabla del podio
     podio_data = []
     for index, row in top_3.iterrows():
         nombre_ganador = row["Competidor"]
-        mejor_tiempo = float('inf')
+        mejor_tiempo = row["Mejor tiempo"]
         
-        # Buscar el mejor tiempo en los intentos
-        if nombre_ganador in resultados:
-            for tipo, valor in resultados[nombre_ganador]:
-                if tipo == "tiempo" and valor < mejor_tiempo:
-                    mejor_tiempo = valor
-        
-        # Formatear la salida
         tiempo_str = f"{mejor_tiempo:.2f}s" if mejor_tiempo != float('inf') else "N/A"
         
         podio_data.append({
@@ -196,4 +200,3 @@ if 'show_podium' in st.session_state and st.session_state.show_podium:
         })
     
     st.table(pd.DataFrame(podio_data))
-
