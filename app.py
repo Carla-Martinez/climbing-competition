@@ -93,9 +93,11 @@ for nombre, pb in competidores.items():
             penalizacion =  -2   # extensible
             if dnfs == 1:
                 puntos_totales += 0
-            if dnfs == 2:
+            elif dnfs == 2:
                 puntos_totales += -1
-            if dnfs < 8:
+            elif dnfs < 8:
+                puntos_totales += -2
+            elif dnfs > 8:
                 puntos_totales += 0
             
     
