@@ -27,14 +27,19 @@ st.title("🏆 Competición de Escalada - Ranking en Vivo")
 # Auto-refresco cada 5 segundos
 _ = st_autorefresh(interval=5000, key="refresh")
 
-# Carga resultados desde CSV
-if os.path.exists(CSV_FILE):
-    df_historial = pd.read_csv(CSV_FILE)
-    resultados = {nombre: [] for nombre in competidores.keys()}
-    for _, row in df_historial.iterrows():
-        resultados[row["Competidor"]].append((row["Tipo"], row["Valor"]))
-else:
-    resultados = {nombre: [] for nombre in competidores.keys()}
+# Carga resultados desde CSV con manejo de errores
+resultados = {nombre: [] for nombre in competidores.keys()}
+if os.path.exists(CSV_FILE) and os.path.getsize(CSV_FILE) > 0:
+    try:
+        df_historial = pd.read_csv(CSV_FILE)
+        for _, row in df_historial.iterrows():
+            resultados[row["Competidor"]].append((row["Tipo"], row["Valor"]))
+    except pd.errors.EmptyDataError:
+        st.warning("El archivo de resultados está vacío. Creando uno nuevo.")
+    except Exception as e:
+        st.error(f"Se ha producido un error al cargar el historial: {e}")
+        st.info("El historial podría estar corrupto. Se reiniciará la aplicación.")
+        os.remove(CSV_FILE)
 
 # Formulario de entrada
 col1, col2, col3 = st.columns([2, 2, 2])
@@ -72,14 +77,10 @@ with col6:
         st.info("Historial borrado. Competición reiniciada.")
 
 # --- Lógica para el nuevo botón de descarga ---
-
-# Prepara los datos para el archivo CSV
-# Combina los resultados de cada competidor en un DataFrame
 data_to_download = []
 for competidor, intentos in resultados.items():
     pb_inicial = competidores[competidor]
     for i, (tipo, valor) in enumerate(intentos):
-        # Calcula los puntos para cada intento individual
         puntos_intento = 0
         if tipo == "tiempo":
             puntos_intento = puntuar(pb_inicial, valor, valor < pb_inicial)
@@ -95,19 +96,16 @@ for competidor, intentos in resultados.items():
 
 df_download = pd.DataFrame(data_to_download)
 
-# Convierte el DataFrame a un objeto StringIO para que Streamlit pueda leerlo en memoria
 csv_string = df_download.to_csv(index=False)
 csv_buffer = io.StringIO(csv_string)
 
 with col7:
-    # Añade el botón de descarga
     st.download_button(
         label="⬇️ Descargar historial",
         data=csv_buffer.getvalue().encode('utf-8'),
         file_name='historial_escalada.csv',
         mime='text/csv',
     )
-
 
 # Cálculo de ranking
 resultados_finales = []
@@ -143,7 +141,3 @@ st.subheader("📜 Historial de intentos")
 for nombre, intentos in resultados.items():
     historial = [f"{valor:.2f}s" if t == "tiempo" else "DNF" for t, valor in intentos]
     st.write(f"**{nombre}**: {', '.join(historial) if historial else 'Sin intentos'}")
-
-
-
-
