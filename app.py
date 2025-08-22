@@ -242,12 +242,13 @@ else:
     
     # Checks that there are at least 3 competitors to form a podium
     if len(top_3) >= 3:
-        # Creamos columnas para el podio, ajustando la relación de anchura y añadiendo espaciadores
+        # Creamos las columnas y ajustamos la distribución para alinear los textos
+        # El 0.5 y 1.5 es para darle espacio entre las columnas y empujar el 1er lugar más a la derecha.
         podium_cols = st.columns([1, 2, 0.5, 2, 0.5, 2, 1])
 
         # Segundo lugar (columna 1)
         with podium_cols[1]:
-            st.write("<br><br>") # Add vertical space
+            st.empty() # Placeholder para un poco más de espacio
             st.metric(label="🥈 Segundo lugar", value=top_3.iloc[1]['Competitor'])
             st.caption(f"Puntos: {top_3.iloc[1]['Points']}")
             st.caption(f"Mejor tiempo: {top_3.iloc[1]['Best time']:.2f}s")
@@ -260,7 +261,8 @@ else:
 
         # Tercer lugar (columna 3)
         with podium_cols[5]:
-            st.write("<br><br>") # Add vertical space
+            st.empty() # Placeholder para un poco más de espacio
+            st.empty() # Placeholder para un poco más de espacio
             st.metric(label="🥉 Tercer lugar", value=top_3.iloc[2]['Competitor'])
             st.caption(f"Puntos: {top_3.iloc[2]['Points']}")
             st.caption(f"Mejor tiempo: {top_3.iloc[2]['Best time']:.2f}s")
