@@ -42,9 +42,7 @@ def puntuar(pb, tiempo, nuevo_pb):
 
 st.title("🏆 Competición de Escalada - Ranking en Vivo")
 
-# --- Refresco automático cada 5s ---
-st_autorefresh = st.experimental_rerun
-st_autorefresh = st_autorefresh
+
 
 st_autorefresh = st.autorefresh(interval=5000, key="refresh")  # cada 5000 ms = 5s
 
