@@ -4,5 +4,10 @@ streamlit-autorefresh
 gspread
 oauth2client
 gspread
+streamlit
+pandas
+gspread
+google-auth
+google-api-python-client
 
 
