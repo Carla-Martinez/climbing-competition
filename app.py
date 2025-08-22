@@ -33,7 +33,7 @@ def puntuar(pb_inicial, mejor_tiempo, tiempo_actual):
 st.title("🏆 Climbing Competition - Live Ranking")
 
 # Initializes the state to control visibility
-if 'show_podium' not in st.session_session_state:
+if 'show_podium' not in st.session_state:
     st.session_state.show_podium = False
 
 # Auto-refresh every 5 seconds
