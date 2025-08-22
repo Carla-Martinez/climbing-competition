@@ -27,7 +27,7 @@ def puntuar(pb_inicial, mejor_tiempo, tiempo_actual):
     # Si no cumple ninguna de las condiciones anteriores, no hay puntos.
     return 0
 
-st.title("🏆 Competición de Escalada - Ranking en Vivo")
+st.title("🏆 Speed Climbing Competition - Live Results")
 
 # Inicializa el estado para controlar la visibilidad
 if 'show_podium' not in st.session_state:
@@ -173,18 +173,18 @@ if not st.session_state.show_podium:
         
         return styles
 
-    st.subheader("📊 Clasificación en Vivo")
+    st.subheader("📊 Ranking")
     # Usa st.dataframe y el estilo para aplicar los colores
     st.dataframe(df.style.apply(highlight_top_three_by_rank, axis=1), use_container_width=True)
 
-    st.subheader("📜 Historial de intentos")
+    st.subheader("📜 Runs")
     for nombre, intentos in resultados.items():
         historial = [f"{valor:.2f}s" if t == "tiempo" else "DNF" for t, valor in intentos]
         st.write(f"**{nombre}**: {', '.join(historial) if historial else 'Sin intentos'}")
         
 # Si el podio está visible, lo muestra
 else:
-    st.subheader("🏆 Podio")
+    st.subheader("🏆 Podium")
     # Botón para volver al ranking
     st.button("↩️ Back to ranking", on_click=lambda: st.session_state.update(show_podium=False))
     
