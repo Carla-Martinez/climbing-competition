@@ -266,4 +266,4 @@ else:
 
     # Para que la imagen se muestre correctamente, debes guardar el archivo de imagen
     # en la misma carpeta que tu archivo app.py y llamarlo "podium.jpeg".
-    st.image("podium.jpeg", use_column_width=True)
+    st.image("podio.jpeg", use_column_width=True)
