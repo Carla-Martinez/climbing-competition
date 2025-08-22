@@ -15,15 +15,17 @@ competidores = {
 CSV_FILE = "resultados.csv"
 
 def puntuar(pb_inicial, mejor_tiempo, tiempo_actual):
-    dif = abs(tiempo_actual - pb_inicial)
-    if dif <= 0.1: puntos = 3
-    elif dif <= 0.2: puntos = 2
-    elif dif <= 0.3: puntos = 1
-    else: puntos = 0
+    # Condición para nuevo PB. Esta es la prioridad más alta.
+    if tiempo_actual <= mejor_tiempo:
+        return 4
     
-    # Compara con el mejor tiempo actual para el PB (bonificación)
-    nuevo_pb = tiempo_actual <= mejor_tiempo
-    return puntos + (4 if nuevo_pb else 0)
+    # Si no es un nuevo PB, comprueba si está cerca del PB inicial.
+    # El usuario pidió solo "3" o "4" puntos, así que solo consideraremos la mejor cercanía (<=0.1s).
+    if abs(tiempo_actual - pb_inicial) <= 0.1:
+        return 3
+        
+    # Si no cumple ninguna de las condiciones anteriores, no hay puntos.
+    return 0
 
 st.title("🏆 Competición de Escalada - Ranking en Vivo")
 
@@ -59,10 +61,11 @@ for nombre, pb in competidores.items():
     for tipo, valor in intentos:
         if tipo == "tiempo":
             # Condición corregida para incluir el mismo tiempo como PB
-            nuevo_pb = valor <= mejor
+            
             if len(intentos) <= 7:
                 puntos += puntuar(pb, mejor, valor)
-                mejor = valor if nuevo_pb else mejor
+                if valor < mejor:
+                    mejor = valor
         else:
             dnfs += 1
             if dnfs > 1:
@@ -96,7 +99,7 @@ if not st.session_state.show_podium:
     with col4:
         if st.button("➕ Añadir intento"):
             resultados[nombre].append(("tiempo", tiempo) if opcion == "Tiempo" and tiempo > 0 else ("dnf", None))
-            st.success(f"{nombre}: {'tiempo ' + f'{tiempo:.2f}s' if opcion == 'Tiempo' else 'DNF'} añadido")
+            st.success(f"{nombre}: {'tiempo ' + f'{tiempo:.2f}s' if opcion == "Tiempo" else 'DNF'} añadido")
             rows = [{"Competidor": n, "Tipo": t, "Valor": v} for n, intentos in resultados.items() for t, v in intentos]
             # Al guardar el CSV, usa ';' como separador
             pd.DataFrame(rows).to_csv(CSV_FILE, index=False, sep=';')
@@ -203,4 +206,5 @@ else:
         })
     
     st.table(pd.DataFrame(podio_data))
+
 
