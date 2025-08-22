@@ -51,7 +51,7 @@ with col2:
 with col3:
     tiempo = st.number_input("Nuevo tiempo (s)", min_value=0.0, step=0.01) if opcion == "Tiempo" else None
 
-col4, col5, col6, col7 = st.columns(4)
+col4, col5, col6, col7, col8 = st.columns(5)
 
 with col4:
     if st.button("➕ Añadir intento"):
@@ -110,6 +110,11 @@ with col7:
         file_name='historial_escalada.csv',
         mime='text/csv',
     )
+    
+# Botón para ver el podio
+with col8:
+    if st.button("🏅 Ver podio"):
+        st.session_state.show_podium = True
 
 # Cálculo de ranking
 resultados_finales = []
@@ -163,5 +168,32 @@ for nombre, intentos in resultados.items():
     historial = [f"{valor:.2f}s" if t == "tiempo" else "DNF" for t, valor in intentos]
     st.write(f"**{nombre}**: {', '.join(historial) if historial else 'Sin intentos'}")
 
-
+# Mostrar el podio solo si el botón se ha pulsado
+if 'show_podium' in st.session_state and st.session_state.show_podium:
+    st.subheader("🏆 Podio")
+    # Limita la tabla a los 3 primeros
+    top_3 = df.head(3)
+    
+    # Obtener el mejor tiempo de cada uno de los top 3
+    podio_data = []
+    for index, row in top_3.iterrows():
+        nombre_ganador = row["Competidor"]
+        mejor_tiempo = float('inf')
+        
+        # Buscar el mejor tiempo en los intentos
+        if nombre_ganador in resultados:
+            for tipo, valor in resultados[nombre_ganador]:
+                if tipo == "tiempo" and valor < mejor_tiempo:
+                    mejor_tiempo = valor
+        
+        # Formatear la salida
+        tiempo_str = f"{mejor_tiempo:.2f}s" if mejor_tiempo != float('inf') else "N/A"
+        
+        podio_data.append({
+            "Posición": index + 1,
+            "Nombre": nombre_ganador,
+            "Mejor Tiempo": tiempo_str
+        })
+    
+    st.table(pd.DataFrame(podio_data))
 
