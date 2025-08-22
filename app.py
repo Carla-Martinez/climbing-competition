@@ -14,12 +14,15 @@ competidores = {
 
 CSV_FILE = "resultados.csv"
 
-def puntuar(pb, tiempo, nuevo_pb):
-    dif = abs(tiempo - pb)
+def puntuar(pb_inicial, mejor_tiempo, tiempo_actual):
+    dif = abs(tiempo_actual - pb_inicial)
     if dif <= 0.1: puntos = 3
     elif dif <= 0.2: puntos = 2
     elif dif <= 0.3: puntos = 1
     else: puntos = 0
+    
+    # Compara con el mejor tiempo actual para el PB (bonificación)
+    nuevo_pb = tiempo_actual <= mejor_tiempo
     return puntos + (4 if nuevo_pb else 0)
 
 st.title("🏆 Competición de Escalada - Ranking en Vivo")
@@ -58,7 +61,7 @@ for nombre, pb in competidores.items():
             # Condición corregida para incluir el mismo tiempo como PB
             nuevo_pb = valor <= mejor
             if len(intentos) <= 7:
-                puntos += puntuar(pb, valor, nuevo_pb)
+                puntos += puntuar(pb, mejor, valor)
                 mejor = valor if nuevo_pb else mejor
         else:
             dnfs += 1
@@ -200,3 +203,4 @@ else:
         })
     
     st.table(pd.DataFrame(podio_data))
+
