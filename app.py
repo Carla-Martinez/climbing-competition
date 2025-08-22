@@ -31,7 +31,8 @@ _ = st_autorefresh(interval=5000, key="refresh")
 resultados = {nombre: [] for nombre in competidores.keys()}
 if os.path.exists(CSV_FILE) and os.path.getsize(CSV_FILE) > 0:
     try:
-        df_historial = pd.read_csv(CSV_FILE)
+        # Nota: pd.read_csv también debe saber el separador
+        df_historial = pd.read_csv(CSV_FILE, sep=';')
         for _, row in df_historial.iterrows():
             resultados[row["Competidor"]].append((row["Tipo"], row["Valor"]))
     except pd.errors.EmptyDataError:
@@ -57,7 +58,8 @@ with col4:
         resultados[nombre].append(("tiempo", tiempo) if opcion == "Tiempo" and tiempo > 0 else ("dnf", None))
         st.success(f"{nombre}: {'tiempo ' + f'{tiempo:.2f}s' if opcion == 'Tiempo' else 'DNF'} añadido")
         rows = [{"Competidor": n, "Tipo": t, "Valor": v} for n, intentos in resultados.items() for t, v in intentos]
-        pd.DataFrame(rows).to_csv(CSV_FILE, index=False)
+        # Al guardar el CSV, usa ';' como separador
+        pd.DataFrame(rows).to_csv(CSV_FILE, index=False, sep=';')
 
 with col5:
     if st.button("↩️ Deshacer último intento"):
@@ -65,7 +67,8 @@ with col5:
             ultimo = resultados[nombre].pop()
             st.info(f"Último intento de {nombre} eliminado ({'DNF' if ultimo[0]=='dnf' else f'{ultimo[1]:.2f}s'})")
             rows = [{"Competidor": n, "Tipo": t, "Valor": v} for n, intentos in resultados.items() for t, v in intentos]
-            pd.DataFrame(rows).to_csv(CSV_FILE, index=False)
+            # Al guardar el CSV, usa ';' como separador
+            pd.DataFrame(rows).to_csv(CSV_FILE, index=False, sep=';')
         else:
             st.error(f"{nombre} no tiene intentos para borrar")
 
@@ -96,7 +99,8 @@ for competidor, intentos in resultados.items():
 
 df_download = pd.DataFrame(data_to_download)
 
-csv_string = df_download.to_csv(index=False)
+# Al crear el archivo para descargar, usa ';' como separador
+csv_string = df_download.to_csv(index=False, sep=';')
 csv_buffer = io.StringIO(csv_string)
 
 with col7:
