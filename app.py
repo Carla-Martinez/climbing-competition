@@ -97,7 +97,7 @@ if not st.session_state.show_podium:
     col4, col5, col6, col7, col8 = st.columns(5)
 
     with col4:
-        if st.button("➕ Añadir intento"):
+        if st.button("➕ Add attempt"):
             resultados[nombre].append(("tiempo", tiempo) if opcion == "Tiempo" and tiempo > 0 else ("dnf", None))
             st.success(f"{nombre}: {'tiempo ' + f'{tiempo:.2f}s' if opcion == "Tiempo" else 'DNF'} añadido")
             rows = [{"Competidor": n, "Tipo": t, "Valor": v} for n, intentos in resultados.items() for t, v in intentos]
@@ -105,7 +105,7 @@ if not st.session_state.show_podium:
             pd.DataFrame(rows).to_csv(CSV_FILE, index=False, sep=';')
 
     with col5:
-        if st.button("↩️ Deshacer último intento"):
+        if st.button("↩️ Undo last attempt"):
             if resultados[nombre]:
                 ultimo = resultados[nombre].pop()
                 st.info(f"Último intento de {nombre} eliminado ({'DNF' if ultimo[0]=='dnf' else f'{ultimo[1]:.2f}s'})")
@@ -116,7 +116,7 @@ if not st.session_state.show_podium:
                 st.error(f"{nombre} no tiene intentos para borrar")
 
     with col6:
-        if st.button("🗑️ Borrar historial"):
+        if st.button("🗑️ Clear history"):
             if os.path.exists(CSV_FILE):
                 os.remove(CSV_FILE)
             resultados = {nombre: [] for nombre in competidores.keys()}
@@ -148,7 +148,7 @@ if not st.session_state.show_podium:
 
     with col7:
         st.download_button(
-            label="⬇️ Descargar historial",
+            label="⬇️ Download history",
             data=csv_buffer.getvalue().encode('utf-8'),
             file_name='historial_escalada.csv',
             mime='text/csv',
@@ -156,7 +156,7 @@ if not st.session_state.show_podium:
 
     # Botón para ver el podio
     with col8:
-        if st.button("🏅 Ver podio"):
+        if st.button("🏅 View podium"):
             st.session_state.show_podium = True
             
     # Función para colorear solo la primera, segunda y tercera fila de la tabla
@@ -186,10 +186,10 @@ if not st.session_state.show_podium:
 else:
     st.subheader("🏆 Podio")
     # Botón para volver al ranking
-    st.button("↩️ Volver al ranking", on_click=lambda: st.session_state.update(show_podium=False))
+    st.button("↩️ Back to ranking", on_click=lambda: st.session_state.update(show_podium=False))
     
-    # Limita la tabla a los 3 primeros
-    top_3 = df.head(3)
+    # Limita la tabla a los 3 primeros que tengan al menos 1 intento
+    top_3 = df[df['Intentos'] > 0].head(3)
     
     # Prepara los datos para la tabla del podio
     podio_data = []
@@ -198,13 +198,22 @@ else:
         mejor_tiempo = row["Mejor tiempo"]
         
         tiempo_str = f"{mejor_tiempo:.2f}s" if mejor_tiempo != float('inf') else "N/A"
+
+        # Asigna el emoji de medalla según la posición
+        if index == 0:
+            posicion_str = "🥇 1st Place"
+        elif index == 1:
+            posicion_str = "🥈 2nd Place"
+        elif index == 2:
+            posicion_str = "� 3rd Place"
+        else:
+            posicion_str = f"{index + 1}th Place"
         
         podio_data.append({
-            "Posición": index + 1,
+            "Posición": posicion_str,
             "Nombre": nombre_ganador,
             "Mejor Tiempo": tiempo_str
         })
     
     st.table(pd.DataFrame(podio_data))
-
 
