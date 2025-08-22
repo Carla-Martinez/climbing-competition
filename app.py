@@ -19,10 +19,13 @@ def puntuar(pb_inicial, mejor_tiempo, tiempo_actual):
     if tiempo_actual <= mejor_tiempo:
         return 4
     
-    # If it's not a new PB, check if it's close to the initial PB.
-    # The user requested only "3" or "4" points, so we will only consider the best proximity (<=0.1s).
+    # New logic for more granular scoring
     if abs(tiempo_actual - pb_inicial) <= 0.1:
         return 3
+    elif abs(tiempo_actual - pb_inicial) <= 0.2:
+        return 2
+    elif abs(tiempo_actual - pb_inicial) <= 0.3:
+        return 1
         
     # If it does not meet any of the above conditions, there are no points.
     return 0
@@ -30,7 +33,7 @@ def puntuar(pb_inicial, mejor_tiempo, tiempo_actual):
 st.title("🏆 Climbing Competition - Live Ranking")
 
 # Initializes the state to control visibility
-if 'show_podium' not in st.session_state:
+if 'show_podium' not in st.session_session_state:
     st.session_state.show_podium = False
 
 # Auto-refresh every 5 seconds
@@ -42,6 +45,11 @@ if os.path.exists(CSV_FILE) and os.path.getsize(CSV_FILE) > 0:
     try:
         # Note: pd.read_csv must also know the separator
         df_historial = pd.read_csv(CSV_FILE, sep=';')
+        
+        # --- FIX: Convert 'Valor' column to numeric to ensure correct comparison ---
+        df_historial['Valor'] = pd.to_numeric(df_historial['Valor'], errors='coerce')
+        # --- END FIX ---
+        
         for _, row in df_historial.iterrows():
             resultados[row["Competidor"]].append((row["Tipo"], row["Valor"]))
     except pd.errors.EmptyDataError:
@@ -223,4 +231,3 @@ else:
         })
     
     st.table(pd.DataFrame(podio_data))
-
