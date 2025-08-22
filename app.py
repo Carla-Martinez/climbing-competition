@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 
 # --- PB iniciales ---
 competidores = {
@@ -21,6 +22,8 @@ competidores = {
     "Víctor": 5.97
 }
 
+CSV_FILE = "resultados.csv"
+
 # --- Función de puntuación ---
 def puntuar(pb, tiempo, nuevo_pb):
     dif = abs(tiempo - pb)
@@ -39,9 +42,20 @@ def puntuar(pb, tiempo, nuevo_pb):
 
 st.title("🏆 Competición de Escalada - Ranking en Vivo")
 
-# --- Memoria de resultados ---
-if "resultados" not in st.session_state:
-    st.session_state.resultados = {nombre: [] for nombre in competidores.keys()}
+# --- Refresco automático cada 5s ---
+st_autorefresh = st.experimental_rerun
+st_autorefresh = st_autorefresh
+
+st_autorefresh = st.autorefresh(interval=5000, key="refresh")  # cada 5000 ms = 5s
+
+# --- Cargar resultados ---
+if os.path.exists(CSV_FILE):
+    df_historial = pd.read_csv(CSV_FILE)
+    resultados = {nombre: [] for nombre in competidores.keys()}
+    for _, row in df_historial.iterrows():
+        resultados[row["Competidor"]].append((row["Tipo"], row["Valor"] if not pd.isna(row["Valor"]) else None))
+else:
+    resultados = {nombre: [] for nombre in competidores.keys()}
 
 # --- Entrada dinámica ---
 col1, col2, col3 = st.columns([2,2,2])
@@ -54,28 +68,49 @@ with col3:
     if opcion == "Tiempo":
         tiempo = st.number_input("Nuevo tiempo (s)", min_value=0.0, step=0.01)
 
-col4, col5 = st.columns(2)
+col4, col5, col6 = st.columns(3)
 with col4:
     if st.button("➕ Añadir intento"):
         if opcion == "Tiempo" and tiempo > 0:
-            st.session_state.resultados[nombre].append(("tiempo", tiempo))
+            resultados[nombre].append(("tiempo", tiempo))
             st.success(f"{nombre}: tiempo {tiempo:.2f}s añadido")
         elif opcion == "DNF":
-            st.session_state.resultados[nombre].append(("dnf", None))
+            resultados[nombre].append(("dnf", None))
             st.warning(f"{nombre}: DNF añadido")
+
+        # Guardar en CSV
+        rows = []
+        for n, intentos in resultados.items():
+            for t, v in intentos:
+                rows.append({"Competidor": n, "Tipo": t, "Valor": v})
+        pd.DataFrame(rows).to_csv(CSV_FILE, index=False)
 
 with col5:
     if st.button("↩️ Deshacer último intento"):
-        if st.session_state.resultados[nombre]:
-            ultimo = st.session_state.resultados[nombre].pop()
+        if resultados[nombre]:
+            ultimo = resultados[nombre].pop()
             st.info(f"Último intento de {nombre} eliminado ({'DNF' if ultimo[0]=='dnf' else f'{ultimo[1]:.2f}s'})")
+
+            # Guardar cambios
+            rows = []
+            for n, intentos in resultados.items():
+                for t, v in intentos:
+                    rows.append({"Competidor": n, "Tipo": t, "Valor": v})
+            pd.DataFrame(rows).to_csv(CSV_FILE, index=False)
         else:
             st.error(f"{nombre} no tiene intentos para borrar")
+
+with col6:
+    if st.button("🗑️ Borrar historial"):
+        if os.path.exists(CSV_FILE):
+            os.remove(CSV_FILE)
+        resultados = {nombre: [] for nombre in competidores.keys()}
+        st.success("Historial borrado, ¡competición reiniciada!")
 
 # --- Cálculo de puntos y ranking ---
 resultados_finales = []
 for nombre, pb in competidores.items():
-    intentos = st.session_state.resultados[nombre]
+    intentos = resultados[nombre]
     puntos_totales = 0
     mejor = pb
     dnfs = 0
@@ -90,14 +125,13 @@ for nombre, pb in competidores.items():
                     mejor = valor
         elif tipo == "dnf":
             dnfs += 1
-            penalizacion =  -1   # extensible
+            penalizacion = -1
             if dnfs == 1:
                 puntos_totales += 0
-            elif dnsf > 1:
+            elif dnfs > 1:
                 puntos_totales += penalizacion
-            elif dnfs > 7 or len(intentos) > 7:
+            if dnfs > 7 or len(intentos) > 7:
                 puntos_totales += 0
-            
     
     resultados_finales.append({
         "Competidor": nombre,
@@ -114,7 +148,7 @@ st.table(df.reset_index(drop=True))
 
 # --- Mostrar historial individual ---
 st.subheader("📜 Historial de intentos")
-for nombre, intentos in st.session_state.resultados.items():
+for nombre, intentos in resultados.items():
     historial = []
     for tipo, valor in intentos:
         if tipo == "tiempo":
@@ -122,3 +156,4 @@ for nombre, intentos in st.session_state.resultados.items():
         else:
             historial.append("DNF")
     st.write(f"**{nombre}**: {', '.join(historial) if historial else 'Sin intentos'}")
+
