@@ -4,7 +4,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 # --- Configuración Google Sheets ---
-SHEET_NAME = "Ranking_Escalada"  # 🔹 cambia al nombre de tu Google Sheet
+SHEET_NAME = "climbing-competition"  # 🔹 cambia al nombre de tu Google Sheet
 WORKSHEET = "resultados"             # 🔹 hoja dentro del Sheet
 
 scope = ["https://spreadsheets.google.com/feeds",
