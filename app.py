@@ -24,7 +24,7 @@ def puntuar(pb_inicial, mejor_tiempo, tiempo_actual):
         return 3
     elif abs(tiempo_actual - pb_inicial) <= 0.2:
         return 2
-    elif abs(tiempo_actual - pb_inicial) <= 0.3:
+    elif abs(tiempo_actual - pb_inicial) <= 0.5:
         return 1
         
     # If it does not meet any of the above conditions, there are no points.
@@ -32,9 +32,13 @@ def puntuar(pb_inicial, mejor_tiempo, tiempo_actual):
 
 st.title("🏆 Climbing Competition - Live Ranking")
 
-# Initializes the state to control visibility
+# Initializes the state to control visibility and confirmation
 if 'show_podium' not in st.session_state:
     st.session_state.show_podium = False
+if 'confirm_undo' not in st.session_state:
+    st.session_state.confirm_undo = False
+if 'confirm_clear' not in st.session_state:
+    st.session_state.confirm_clear = False
 
 # Auto-refresh every 5 seconds
 _ = st_autorefresh(interval=5000, key="refresh")
@@ -113,22 +117,45 @@ if not st.session_state.show_podium:
             pd.DataFrame(rows).to_csv(CSV_FILE, index=False, sep=';')
 
     with col5:
-        if st.button("↩️ Undo last attempt"):
-            if resultados[nombre]:
-                ultimo = resultados[nombre].pop()
-                st.info(f"Last attempt for {nombre} removed ({'DNF' if ultimo[0]=='dnf' else f'{ultimo[1]:.2f}s'})")
-                rows = [{"Competidor": n, "Tipo": t, "Valor": v} for n, intentos in resultados.items() for t, v in intentos]
-                # When saving the CSV, use ';' as a separator
-                pd.DataFrame(rows).to_csv(CSV_FILE, index=False, sep=';')
-            else:
-                st.error(f"{nombre} has no attempts to delete")
+        # Conditional buttons for Undo confirmation
+        if st.session_state.confirm_undo:
+            st.warning("Are you sure you want to undo the last attempt?")
+            col_confirm_undo, col_cancel_undo = st.columns(2)
+            with col_confirm_undo:
+                if st.button("Confirm Undo"):
+                    if resultados[nombre]:
+                        ultimo = resultados[nombre].pop()
+                        st.info(f"Last attempt for {nombre} removed ({'DNF' if ultimo[0]=='dnf' else f'{ultimo[1]:.2f}s'})")
+                        rows = [{"Competidor": n, "Tipo": t, "Valor": v} for n, intentos in resultados.items() for t, v in intentos]
+                        pd.DataFrame(rows).to_csv(CSV_FILE, index=False, sep=';')
+                    else:
+                        st.error(f"{nombre} has no attempts to delete")
+                    st.session_state.confirm_undo = False
+            with col_cancel_undo:
+                if st.button("Cancel"):
+                    st.session_state.confirm_undo = False
+        else:
+            if st.button("↩️ Undo last attempt"):
+                st.session_state.confirm_undo = True
 
     with col6:
-        if st.button("🗑️ Clear history"):
-            if os.path.exists(CSV_FILE):
-                os.remove(CSV_FILE)
-            resultados = {nombre: [] for nombre in competidores.keys()}
-            st.info("History cleared. Competition reset.")
+        # Conditional buttons for Clear confirmation
+        if st.session_state.confirm_clear:
+            st.warning("Are you sure you want to clear all history? This action cannot be undone.")
+            col_confirm_clear, col_cancel_clear = st.columns(2)
+            with col_confirm_clear:
+                if st.button("Confirm Clear"):
+                    if os.path.exists(CSV_FILE):
+                        os.remove(CSV_FILE)
+                    resultados = {nombre: [] for nombre in competidores.keys()}
+                    st.info("History cleared. Competition reset.")
+                    st.session_state.confirm_clear = False
+            with col_cancel_clear:
+                if st.button("Cancel"):
+                    st.session_state.confirm_clear = False
+        else:
+            if st.button("🗑️ Clear history"):
+                st.session_state.confirm_clear = True
 
     # --- Logic for the new download button ---
     data_to_download = []
