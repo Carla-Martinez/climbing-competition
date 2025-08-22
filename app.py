@@ -139,25 +139,33 @@ for nombre, pb in competidores.items():
 
 df = pd.DataFrame(resultados_finales).sort_values(by="Puntos", ascending=False)
 
-# Función para colorear las filas según la posición
-def highlight_top_three(row):
-    # Obtiene la posición de la fila (índice)
-    rank = row.name
-    # Define los colores en formato CSS
-    if rank == 0:
-        return ['background-color: gold'] * len(row)
-    elif rank == 1:
-        return ['background-color: silver'] * len(row)
-    elif rank == 2:
-        return ['background-color: #CD7F32'] * len(row)  # Bronce
-    else:
-        return [''] * len(row)
+# Función para colorear las filas según la posición, manejando empates
+def highlight_top_three(df):
+    styles = pd.DataFrame('', index=df.index, columns=df.columns)
+    
+    # Obtiene las 3 primeras puntuaciones únicas
+    top_scores = df['Puntos'].unique()[:3]
+
+    if len(top_scores) >= 1:
+        # Colorea a todos los que estén en la 1ª posición con color translúcido
+        styles.loc[df['Puntos'] == top_scores[0]] = 'background-color: rgba(255, 215, 0, 0.4)'
+    
+    if len(top_scores) >= 2:
+        # Colorea a todos los que estén en la 2ª posición con color translúcido
+        styles.loc[df['Puntos'] == top_scores[1]] = 'background-color: rgba(192, 192, 192, 0.4)'
+
+    if len(top_scores) >= 3:
+        # Colorea a todos los que estén en la 3ª posición con color translúcido
+        styles.loc[df['Puntos'] == top_scores[2]] = 'background-color: rgba(205, 127, 50, 0.4)'
+    
+    return styles
 
 st.subheader("📊 Clasificación en Vivo")
 # Usa st.dataframe y el estilo para aplicar los colores
-st.dataframe(df.style.apply(highlight_top_three, axis=1), use_container_width=True)
+st.dataframe(df.style.apply(highlight_top_three, axis=None), use_container_width=True)
 
 st.subheader("📜 Historial de intentos")
 for nombre, intentos in resultados.items():
     historial = [f"{valor:.2f}s" if t == "tiempo" else "DNF" for t, valor in intentos]
     st.write(f"**{nombre}**: {', '.join(historial) if historial else 'Sin intentos'}")
+
