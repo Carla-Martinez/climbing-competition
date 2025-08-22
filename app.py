@@ -91,7 +91,7 @@ for nombre, pb in competidores.items():
         elif tipo == "dnf":
             dnfs += 1
             penalizacion =  -1   # extensible
-            if dnfs == 1
+            if dnfs == 1:
                 puntos_totales += 0
             elif dnsf > 1:
                 puntos_totales += penalizacion
