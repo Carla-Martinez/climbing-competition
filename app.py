@@ -137,12 +137,13 @@ for nombre, pb in competidores.items():
         "Puntos": puntos
     })
 
+# Aquí la tabla se ordena por puntos
 df = pd.DataFrame(resultados_finales).sort_values(by="Puntos", ascending=False)
 
 # Función para colorear solo la primera, segunda y tercera fila de la tabla
 def highlight_top_three_by_rank(row):
-    rank = row.name # Obtiene la posición (índice) de la fila
-    styles = [''] * len(row) # Crea una lista de estilos vacíos
+    rank = df.index.get_loc(row.name)  # Obtiene la posición de la fila en el DataFrame ordenado
+    styles = [''] * len(row)
 
     if rank == 0:
         styles = ['background-color: rgba(255, 215, 0, 0.4)'] * len(row) # Oro
@@ -161,5 +162,6 @@ st.subheader("📜 Historial de intentos")
 for nombre, intentos in resultados.items():
     historial = [f"{valor:.2f}s" if t == "tiempo" else "DNF" for t, valor in intentos]
     st.write(f"**{nombre}**: {', '.join(historial) if historial else 'Sin intentos'}")
+
 
 
