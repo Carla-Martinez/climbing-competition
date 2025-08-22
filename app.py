@@ -122,7 +122,8 @@ if not st.session_state.show_podium:
             st.warning("Are you sure you want to undo the last attempt?")
             col_confirm_undo, col_cancel_undo = st.columns(2)
             with col_confirm_undo:
-                if st.button("Confirm Undo"):
+                # Green "Yes" button
+                if st.button("✅ Yes", type="primary"):
                     if resultados[nombre]:
                         ultimo = resultados[nombre].pop()
                         st.info(f"Last attempt for {nombre} removed ({'DNF' if ultimo[0]=='dnf' else f'{ultimo[1]:.2f}s'})")
@@ -132,7 +133,8 @@ if not st.session_state.show_podium:
                         st.error(f"{nombre} has no attempts to delete")
                     st.session_state.confirm_undo = False
             with col_cancel_undo:
-                if st.button("Cancel"):
+                # Red "No" button
+                if st.button("❌ No"):
                     st.session_state.confirm_undo = False
         else:
             if st.button("↩️ Undo last attempt"):
@@ -144,14 +146,16 @@ if not st.session_state.show_podium:
             st.warning("Are you sure you want to clear all history? This action cannot be undone.")
             col_confirm_clear, col_cancel_clear = st.columns(2)
             with col_confirm_clear:
-                if st.button("Confirm Clear"):
+                # Green "Yes" button
+                if st.button("✅ Yes", type="primary"):
                     if os.path.exists(CSV_FILE):
                         os.remove(CSV_FILE)
                     resultados = {nombre: [] for nombre in competidores.keys()}
                     st.info("History cleared. Competition reset.")
                     st.session_state.confirm_clear = False
             with col_cancel_clear:
-                if st.button("Cancel"):
+                # Red "No" button
+                if st.button("❌ No"):
                     st.session_state.confirm_clear = False
         else:
             if st.button("🗑️ Clear history"):
@@ -196,27 +200,24 @@ if not st.session_state.show_podium:
             mime='text/csv',
         )
 
-    # Button to view the podium
     with col8:
         if st.button("🏅 View podium"):
             st.session_state.show_podium = True
             
-    # Function to color only the first, second and third row of the table
     def highlight_top_three_by_rank(row):
-        rank = df.index.get_loc(row.name)  # Get the row's position in the sorted DataFrame
+        rank = df.index.get_loc(row.name)
         styles = [''] * len(row)
 
         if rank == 0:
-            styles = ['background-color: rgba(255, 215, 0, 0.4)'] * len(row) # Gold
+            styles = ['background-color: rgba(255, 215, 0, 0.4)'] * len(row)
         elif rank == 1:
-            styles = ['background-color: rgba(192, 192, 192, 0.4)'] * len(row) # Silver
+            styles = ['background-color: rgba(192, 192, 192, 0.4)'] * len(row)
         elif rank == 2:
-            styles = ['background-color: rgba(205, 127, 50, 0.4)'] * len(row) # Bronze
+            styles = ['background-color: rgba(205, 127, 50, 0.4)'] * len(row)
         
         return styles
 
     st.subheader("📊 Live Ranking")
-    # Use st.dataframe and the style to apply the colors
     st.dataframe(df.style.apply(highlight_top_three_by_rank, axis=1), use_container_width=True)
 
     st.subheader("📜 Attempt History")
@@ -224,16 +225,12 @@ if not st.session_state.show_podium:
         historial = [f"{valor:.2f}s" if t == "tiempo" else "DNF" for t, valor in intentos]
         st.write(f"**{nombre}**: {', '.join(historial) if historial else 'No attempts'}")
         
-# If the podium is visible, show it
 else:
     st.subheader("🏆 Podium")
-    # Button to go back to the ranking
     st.button("↩️ Back to ranking", on_click=lambda: st.session_state.update(show_podium=False))
     
-    # Limits the table to the top 3 with at least 1 attempt
     top_3 = df[df['Attempts'] > 0].head(3)
     
-    # Prepare data for the podium table
     podio_data = []
     for index, row in top_3.iterrows():
         nombre_ganador = row["Competitor"]
@@ -241,7 +238,6 @@ else:
         
         tiempo_str = f"{mejor_tiempo:.2f}s" if mejor_tiempo != float('inf') else "N/A"
 
-        # Assign the medal emoji according to the position
         if index == 0:
             posicion_str = "🥇 1st Place"
         elif index == 1:
