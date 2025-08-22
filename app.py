@@ -9,7 +9,7 @@ WORKSHEET = "resultados"             # 🔹 hoja dentro del Sheet
 
 scope = ["https://spreadsheets.google.com/feeds",
          "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("credenciales.json", scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name("climbing-competition-469809-e203775ad1eb.json", scope)
 client = gspread.authorize(creds)
 
 # Intenta abrir la hoja, si no existe crea una
