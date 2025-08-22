@@ -138,8 +138,24 @@ for nombre, pb in competidores.items():
     })
 
 df = pd.DataFrame(resultados_finales).sort_values(by="Puntos", ascending=False)
+
+# Función para colorear las filas según la posición
+def highlight_top_three(row):
+    # Obtiene la posición de la fila (índice)
+    rank = row.name
+    # Define los colores en formato CSS
+    if rank == 0:
+        return ['background-color: gold'] * len(row)
+    elif rank == 1:
+        return ['background-color: silver'] * len(row)
+    elif rank == 2:
+        return ['background-color: #CD7F32'] * len(row)  # Bronce
+    else:
+        return [''] * len(row)
+
 st.subheader("📊 Clasificación en Vivo")
-st.table(df.reset_index(drop=True))
+# Usa st.dataframe y el estilo para aplicar los colores
+st.dataframe(df.style.apply(highlight_top_three, axis=1), use_container_width=True)
 
 st.subheader("📜 Historial de intentos")
 for nombre, intentos in resultados.items():
