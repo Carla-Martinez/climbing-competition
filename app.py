@@ -95,7 +95,7 @@ for nombre, pb in competidores.items():
                 puntos_totales += 0
             elif dnsf > 1:
                 puntos_totales += penalizacion
-            elif dnfs > 7 or len(intentos) > 7
+            elif dnfs > 7 or len(intentos) > 7:
                 puntos_totales += 0
             
     
