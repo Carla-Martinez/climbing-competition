@@ -1,23 +1,31 @@
 import streamlit as st
 import pandas as pd
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+import json
+from google.oauth2.service_account import Credentials
 
 # --- Configuración Google Sheets ---
-SHEET_NAME = "climbing-competition"  # 🔹 cambia al nombre de tu Google Sheet
-WORKSHEET = "resultados"             # 🔹 hoja dentro del Sheet
+# Reemplaza los nombres de tu hoja y pestaña
+SHEET_NAME = "climbing-competition"
+WORKSHEET = "resultados"
 
-scope = ["https://spreadsheets.google.com/feeds",
-         "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("climbing-competition-469809-e203775ad1eb.json", scope)
+# Carga las credenciales desde los secretos de Streamlit
+# El nombre 'gcloud_service_account' debe coincidir con el del archivo secrets.toml
+creds_json = st.secrets["gcloud_service_account"]
+creds = Credentials.from_service_account_info(
+    json.loads(creds_json),
+    scopes=['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+)
+
+# Autoriza a gspread
 client = gspread.authorize(creds)
 
-# Intenta abrir la hoja, si no existe crea una
+# Intenta abrir la hoja, si no existe la crea
 try:
     sheet = client.open(SHEET_NAME).worksheet(WORKSHEET)
 except gspread.exceptions.WorksheetNotFound:
     sheet = client.open(SHEET_NAME).add_worksheet(title=WORKSHEET, rows="1000", cols="20")
-    sheet.append_row(["Competidor", "PB inicial", "Intentos", "DNFs", "Puntos"])  # encabezado
+    sheet.append_row(["Competidor", "PB inicial", "Intentos", "DNFs", "Puntos"]) # encabezado
 
 # --- PB iniciales ---
 competidores = {
