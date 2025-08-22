@@ -90,14 +90,12 @@ for nombre, pb in competidores.items():
                     mejor = valor
         elif tipo == "dnf":
             dnfs += 1
-            penalizacion =  -2   # extensible
-            if dnfs == 1:
+            penalizacion =  -1   # extensible
+            if dnfs == 1
                 puntos_totales += 0
-            elif dnfs == 2:
-                puntos_totales += -1
-            elif dnfs < 8:
-                puntos_totales += -2
-            elif dnfs > 8:
+            elif dnsf > 1:
+                puntos_totales += penalizacion
+            elif dnfs > 7 or len(intentos) > 7
                 puntos_totales += 0
             
     
