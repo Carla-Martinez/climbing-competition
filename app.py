@@ -261,6 +261,9 @@ else:
             st.metric(label="🥉 Tercer lugar", value=top_3.iloc[2]['Competitor'])
             st.caption(f"Puntos: {top_3.iloc[2]['Points']}")
             st.caption(f"Mejor tiempo: {top_3.iloc[2]['Best time']:.2f}s")
-
     else:
         st.info("No hay suficientes competidores con intentos para formar un podio.")
+
+    # Para que la imagen se muestre correctamente, debes guardar el archivo de imagen
+    # en la misma carpeta que tu archivo app.py y llamarlo "podium.jpeg".
+    st.image("podium.jpeg", use_column_width=True)
