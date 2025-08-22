@@ -88,9 +88,9 @@ if not st.session_state.show_podium:
     # Formulario de entrada
     col1, col2, col3 = st.columns([2, 2, 2])
     with col1:
-        nombre = st.selectbox("Escoge competidor", list(competidores.keys()))
+        nombre = st.selectbox("Choose competitor", list(competidores.keys()))
     with col2:
-        opcion = st.radio("Resultado", ["Tiempo", "DNF"], horizontal=True)
+        opcion = st.radio("Result", ["Tiempo", "DNF"], horizontal=True)
     with col3:
         tiempo = st.number_input("Nuevo tiempo (s)", min_value=0.0, step=0.01) if opcion == "Tiempo" else None
 
@@ -205,7 +205,7 @@ else:
         elif index == 1:
             posicion_str = "🥈 2nd Place"
         elif index == 2:
-            posicion_str = "� 3rd Place"
+            posicion_str = "🥉 3rd Place"
         else:
             posicion_str = f"{index + 1}th Place"
         
@@ -216,4 +216,5 @@ else:
         })
     
     st.table(pd.DataFrame(podio_data))
+
 
