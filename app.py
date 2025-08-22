@@ -126,13 +126,20 @@ if not st.session_state.show_podium:
     data_to_download = []
     for competidor, intentos in resultados.items():
         pb_inicial = competidores[competidor]
+        mejor_tiempo_history = pb_inicial  # Track the best time for each attempt
+        
         for i, (tipo, valor) in enumerate(intentos):
             puntos_intento = 0
             if tipo == "tiempo":
-                puntos_intento = puntuar(pb_inicial, valor, valor < pb_inicial)
+                # Correctly calculate points based on the best time at this point in the history
+                puntos_intento = puntuar(pb_inicial, mejor_tiempo_history, valor)
+                
+                # Update the best time for the next attempt in the history
+                if valor < mejor_tiempo_history:
+                    mejor_tiempo_history = valor
             
             data_to_download.append({
-                "Competidor": competidor,
+                "Competitor": competidor,
                 "Initial PB": pb_inicial,
                 "Attempt": i + 1,
                 "Attempt Type": tipo,
@@ -216,5 +223,4 @@ else:
         })
     
     st.table(pd.DataFrame(podio_data))
-
 
