@@ -242,27 +242,28 @@ else:
     
     # Checks that there are at least 3 competitors to form a podium
     if len(top_3) >= 3:
-        podium_cols = st.columns(3)
+        # Creamos columnas para el podio, ajustando la relación de anchura
+        podium_cols = st.columns([1, 2, 2, 2, 1])
 
-        # First place
+        # Segundo lugar (columna 1)
         with podium_cols[1]:
-            st.metric(label="🥇 Primer lugar", value=top_3.iloc[0]['Competitor'])
-            st.caption(f"Puntos: {top_3.iloc[0]['Points']}")
-            st.caption(f"Mejor tiempo: {top_3.iloc[0]['Best time']:.2f}s")
-        
-        # Second place
-        with podium_cols[0]:
             st.metric(label="🥈 Segundo lugar", value=top_3.iloc[1]['Competitor'])
             st.caption(f"Puntos: {top_3.iloc[1]['Points']}")
             st.caption(f"Mejor tiempo: {top_3.iloc[1]['Best time']:.2f}s")
-
-        # Third place
+        
+        # Primer lugar (columna 2)
         with podium_cols[2]:
+            st.metric(label="🥇 Primer lugar", value=top_3.iloc[0]['Competitor'])
+            st.caption(f"Puntos: {top_3.iloc[0]['Points']}")
+            st.caption(f"Mejor tiempo: {top_3.iloc[0]['Best time']:.2f}s")
+
+        # Tercer lugar (columna 3)
+        with podium_cols[3]:
             st.metric(label="🥉 Tercer lugar", value=top_3.iloc[2]['Competitor'])
             st.caption(f"Puntos: {top_3.iloc[2]['Points']}")
             st.caption(f"Mejor tiempo: {top_3.iloc[2]['Best time']:.2f}s")
     else:
         st.info("Not enough competitors with attempts to form a podium.")
 
-    # Aggiungi l'immagine del podio
+    # Muestra la imagen del podio
     st.image("podi2.png", use_container_width=True)
