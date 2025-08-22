@@ -82,16 +82,22 @@ for nombre, pb in competidores.items():
     for tipo, valor in intentos:
         if tipo == "tiempo":
             nuevo_pb = valor < mejor
-            puntos_totales += puntuar(pb, valor, nuevo_pb)
-            if nuevo_pb:
-                mejor = valor
+            if len(intentos) > 7:
+                puntos_totales += 0
+            else:
+                puntos_totales += puntuar(pb, valor, nuevo_pb)
+                if nuevo_pb:
+                    mejor = valor
         elif tipo == "dnf":
             dnfs += 1
-            penalizacion = [0, -1, -2, -4, -8]  # extensible
-            if dnfs < len(penalizacion):
-                puntos_totales += penalizacion[dnfs]
-            else:
-                puntos_totales += -8  # límite para 5º en adelante
+            penalizacion =  -2   # extensible
+            if dnfs == 1:
+                puntos_totales += 0
+            if dnfs == 2:
+                puntos_totales += -1
+            if dnfs < 8:
+                puntos_totales += 0
+            
     
     resultados_finales.append({
         "Competidor": nombre,
