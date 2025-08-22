@@ -1,13 +1,1 @@
-{
-  "type": "service_account",
-  "project_id": "climbing-competition-469809",
-  "private_key_id": "e203775ad1eb94fbfa5f191f810b1bece385e0a4",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCwCIk0bLSIG7QO\nf1vA5Us4bO7G5zvgpUE2CIjvyWwgW0ZLEUvz/N45YrbJE6RSNpvmG3usdusIoEFo\nCgeiOqpFBOylnTTpY1aP/1KFxQKcM6FYyVmLRuCLiTLt/+sSg/dI74xh1WTMtgyA\nTg6k9FUGjc69mgE5z8fy67f/vZEBR5AvxVHz2O0ZqB77SMInK+EfUZuaBiXYq5r8\nbX7aOivRtPJearggzC4T/tOxqaUmnqTVM5pSoZ5ElboRXK/2a3oCMIkIIOGLEXPv\nlQWEOQaLVdleRMD61FXpaNaz/5j3H2swVA2K3DnG9aEIaruZ+d8STGwZORC4GsMj\nOqNcifUvAgMBAAECggEANW4h1xu3oChoeo4Fl4MBVdsajpzY+9Ks/G2SwtVsUFXj\n/Bz/5Mq32Msxl86ybZHNuAZXf32I0VFzCNUihAcyb0iTW6Ff0gco2wQwVBH8PNUf\nAAf9edzFgxTdtIedHj2X7TdocLmIouoO2VLX9xGCTT71pW79OELs+bq6WpF7VduV\n9dQe8IfsOGmskdWQuxeAd3bK9ibYhCgBwdOo0UWKzVTjWedD/hfcpQIkMmoTtt+v\nAQ7CBGEQG0bCH7Mjb3owFiPal0bRQQat7FGS3PYcGjPFd3NiCFyIL/L8ImyuOM2O\nEPWAzso/op2s0oEc17BVWj7ALhT6u+8I5bfO8376oQKBgQDUsQKgDDnWtwVLvRgA\n6Jw6lGoGRt/Yr1fohRy3pR0nCOYlHSBL5uZUPDQGHuPb94+UjIuFQf4cDo9uF7J5\n44AqmDubW5fn8NAW0s1bOIm/RNDIO5PiHxIWToVTvNvWNX91FvIreKhXcgvnWGNx\n2OX7YDI5+jFLjPZQ6U4c+EvjQwKBgQDT4KUV0K1JI2WNwQUeuE22g5qyCZB3VbG5\nCBrYv94clOwIUNrYd4TUyXIKGrJZ7XvP+nBX8izy1ypQN17o+kq0W6WKOs1UuHlI\nRtgLtflknSirEI9JrbRXo5lh2M8FCngUl96KPvL9mpjpgiL93YemZ1rfVXqoliRv\nfP2bZ05ppQKBgHqMVyfig3zszVdbZ7Y2ULYMB58APT/7n9owwGAr+cUhAoJF6vLw\n4quMWKliKQX3+TmtVUJ9yK1f0lKrwsEqTRG9zzJvrvIMNcnAwmQaCnwzaVzFvyqd\nnm1N5tJd0gj1oC/V/ckAZ3ajFqrAqePSBok1Xxs6xiZy3QW3t7NHeWpDAoGBAIs6\n4gDV4ilfo0plfrHTNu4qySsZcd+ZZnJKyymH27M4gWpth4Ib+CPERLYzGORTVLs0\nvUJtl+/0SI/x8uJyJ0khuER/o5J6rug59ZqseDgPtjvDZAVsqke08AQGbvPHD2Wo\n7so114OjZbx8kfX070EARgzgpPvHviWtIxJN7o8pAoGAPutUnW7UWZ7SZgByxr0I\nIf5f2AEcDbS7bcQY03ciq9JL6Bs+jErPKkXRlyLV2v0zEQ86euOBQ9JrkLSm6fZ9\nhfkmAALAA8oS7TMvjH/7f4KhmeDjU6HuNhIVsUMIxqBT+IE7n8hjO7KSP8MKUd8c\nIqbYynB9VYIgHf1UPKLnLOE=\n-----END PRIVATE KEY-----\n",
-  "client_email": "streamlit-bot@climbing-competition-469809.iam.gserviceaccount.com",
-  "client_id": "110282932082853673102",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/streamlit-bot%40climbing-competition-469809.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}
+
