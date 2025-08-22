@@ -242,8 +242,8 @@ else:
     
     # Se comprueba que hay al menos 3 competidores para mostrar el podio
     if len(top_3) >= 3:
-        st.write(f"🥇 **Primer Lugar:** {top_3.iloc[0]['Competitor']} con {top_3.iloc[0]['Points']} puntos")
-        st.write(f"🥈 **Segundo Lugar:** {top_3.iloc[1]['Competitor']} con {top_3.iloc[1]['Points']} puntos")
-        st.write(f"🥉 **Tercer Lugar:** {top_3.iloc[2]['Competitor']} con {top_3.iloc[2]['Points']} puntos")
+        st.write(f"🥇 **Primer Lugar:** {top_3.iloc[0]['Competitor']} con {top_3.iloc[0]['Points']} puntos. Mejor tiempo: {top_3.iloc[0]['Best time']:.2f}s")
+        st.write(f"🥈 **Segundo Lugar:** {top_3.iloc[1]['Competitor']} con {top_3.iloc[1]['Points']} puntos. Mejor tiempo: {top_3.iloc[1]['Best time']:.2f}s")
+        st.write(f"🥉 **Tercer Lugar:** {top_3.iloc[2]['Competitor']} con {top_3.iloc[2]['Points']} puntos. Mejor tiempo: {top_3.iloc[2]['Best time']:.2f}s")
     else:
         st.info("No hay suficientes competidores con intentos para formar un podio.")
