@@ -265,4 +265,4 @@ else:
         st.info("Not enough competitors with attempts to form a podium.")
 
     # Aggiungi l'immagine del podio
-    st.image("Podium.png", use_container_width=True)
+    st.image("podi.png", use_container_width=True)
